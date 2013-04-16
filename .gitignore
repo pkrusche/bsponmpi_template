@@ -1,0 +1,7 @@
+/template.sublime-project
+/template.sublime-workspace
+*.o
+*.obj
+.sconf_temp
+main
+autoconfig.h

@@ -1,0 +1,4 @@
+
+Import("root")
+
+root.Program('#bin/main', 'main.cpp')
