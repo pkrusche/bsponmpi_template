@@ -63,7 +63,7 @@ int main(int argc, char ** argv) {
 	if threadsafe:
 		libsuffix += '_mt'
 
-	context.env.Append(LIBS=libsuffix)
+	context.env.Prepend(LIBS=libsuffix)
 
 	if not sequential:
 		if arch == 'Windows':

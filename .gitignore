@@ -1,8 +1,11 @@
 /template.sublime-project
 /template.sublime-workspace
+/config.log
 *.o
 *.obj
 .sconf_temp
 main
 autoconfig.h
 bin/unit_tests
+.sconsign.dblite
+*.pyc

@@ -81,13 +81,13 @@ def MakeOptions (opts):
 	arch   = platform.uname()[0]
 	if arch == 'Windows':
 		opts.AddVariables(
-	    	('veclibdir', 'Path to Agner Fog\'s vector library', '..\\vectorclass'),
-	    	('asmlibdir', 'Path to Agner Fog\'s assembler library', '..\\asmlib'),
+	    	('veclibdir', 'Path to Agner Fog\'s vector library', os.path.abspath('..\\vectorclass')),
+	    	('asmlibdir', 'Path to Agner Fog\'s assembler library', os.path.abspath('..\\asmlib')),
 		)
 	else:
 		opts.AddVariables(
-	    	('veclibdir', 'Path to Agner Fog\'s vector library', '../vectorclass'),
-	    	('asmlibdir', 'Path to Agner Fog\'s assembler library', '../asmlib'),
+	    	('veclibdir', 'Path to Agner Fog\'s vector library', os.path.abspath('../vectorclass')),
+	    	('asmlibdir', 'Path to Agner Fog\'s assembler library', os.path.abspath('../asmlib')),
 		)
 
 ###############################################################################
