@@ -5,3 +5,4 @@
 .sconf_temp
 main
 autoconfig.h
+bin/unit_tests

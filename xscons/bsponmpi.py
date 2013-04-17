@@ -50,7 +50,9 @@ int main(int argc, char ** argv) {
 		sequential = 0
 		threadsafe = 0		
 	else:
-		raise Exception('Unknown version of bsponmpi library: ' + bspv)
+		context.Message('Unknown version of bsponmpi library/library not found: ' + bspv + " ")
+		context.Result(0)	
+		return
 
 	if sequential:
 		libsuffix += 'nompi'
@@ -92,7 +94,11 @@ int main(int argc, char ** argv) {
 				LINK = root['MPILINK'],
 				CC = root['MPICC']
 			)
-
+	if not sequential and ret:
+		ret = 2
+	if sequential and ret:
+		ret = 1
+		
 	context.Message("found " + bspv + " ")
 	context.Result(ret)
 

@@ -6,7 +6,6 @@
 import os
 import os.path
 import glob
-import re
 import platform;
 
 from SCons.Defaults import *
@@ -19,19 +18,30 @@ import xscons.bsponmpi
 import xscons.tbb
 import xscons.blas
 import xscons.boost
+import xscons.agner_libs
 import xscons.autoconfig
 
 ###############################################################################
 # read options and configure directories
 ###############################################################################
 
+# default options file name
 optfilename = 'opts.py'
 
+# Options file for current platform
+optfilename_plat = 'opts_'+platform.uname()[0]+'_'+platform.uname()[4]+'.py'
+
 # Try to find options file based on hostname
+#
 optfilename_local = 'opts_'+platform.uname()[1]+'_'+platform.uname()[0]+'_'+platform.uname()[4]+'.py'
 if len(glob.glob(optfilename_local)) > 0:
     optfilename = optfilename_local
+# Second choice: platform file
+elif len(glob.glob(optfilename_plat)) > 0:
+    optfilename = optfilename_plat
 else:
+# third choice: stick with opts.py
+    print 'To use specific options for this platform, use options file "'+optfilename_plat+'"'
     print 'To use specific options for this system, use options file "'+optfilename_local+'"'
 
 print 'Using options from ' + optfilename
@@ -50,7 +60,7 @@ opts.AddVariables(
 	('toolset', 'Specify compiler and linker tools: msvc|gnu|intel', 'gnu'),
 	('additional_lflags', 'Additional linker flags', ''),
 	('additional_cflags', 'Additional compiler flags', ''),
-	('mpiexec', 'MPI exec command for testing', 'mpiexec'),
+	('mpiexec', 'MPI exec command for testing', ''),
 	('mpiexec_params', 'MPI exec parameters for testing', '-n 3')
 	)
 
@@ -82,6 +92,7 @@ xscons.bsponmpi.MakeOptions(opts)
 xscons.boost.MakeOptions(opts)
 xscons.tbb.MakeOptions(opts)
 xscons.blas.MakeOptions(opts)
+xscons.agner_libs.MakeOptions(opts)
 
 root = Environment(
     tools = ttools,
@@ -139,6 +150,7 @@ xscons.tbb.MakeEnv(root)
 xscons.bsponmpi.MakeEnv(root)
 xscons.boost.MakeEnv(root)
 xscons.blas.MakeEnv(root)
+xscons.agner_libs.MakeEnv(root)
 
 ## additional flags not covered by any of the above
 root.Append ( 
@@ -150,18 +162,17 @@ root.Append (
 # Automatic configuration code
 ###############################################################################
 
-sequential = 0
-threadsafe = 0
-
 def ConfRunner(conf, autohdr):
 	if not conf.CheckBSPONMPI():
 		print "I could not find bsponmpi. Have a look at xscons/bsponmpi.py"
-	if not conf.CheckBoost('1.40'):
-		print "I could not find Boost >= 1.40. Have a look at xscons/boost.py"
-	if not conf.CheckTBB(3):
-		print "I could not find Intel TBB version >= 3.0. Have a look at xscons/tbb.py"
+	if not conf.CheckBoost():
+		print "I could not find a recent enough version of Boost. Have a look at xscons/boost.py"
+	if not conf.CheckTBB():
+		print "I could not find a recent enough version of TBB. Have a look at xscons/tbb.py"
+	if not conf.CheckAgner():
+		print "I could not find any of Agner Fog's libraries. Have a look at xscons/agner_libs.py"
 	if not conf.CheckBLAS():
-		print "No version of BLAS was found"
+		print "No version of BLAS was found.  Have a look at xscons/blas.py"
 	else:
 		print "BLAS Support enabled"
                 autohdr.write("""
@@ -173,6 +184,7 @@ xscons.autoconfig.AutoConfig ( root, ConfRunner, {
 	'CheckBSPONMPI' : xscons.bsponmpi.Check,
 	'CheckTBB' : xscons.tbb.Check,
 	'CheckBLAS' : xscons.blas.Check,
+	'CheckAgner' : xscons.agner_libs.Check,
 	} )
 
 ###############################################################################
@@ -203,7 +215,7 @@ def builder_unit_test_mpi(target, source, env):
 		return 1
 
 # Create a builder for tests
-if sequential:
+if not root['mpiexec']:
 	bld = Builder(action = builder_unit_test)
 	root.Append(BUILDERS = {'Test' :  bld})
 else:
@@ -213,7 +225,8 @@ else:
 Export(['root', 'runtests'])
 
 ###############################################################################
-# get SConscript
+# get SConscripts
 ###############################################################################
 
 SConscript('src/SConscript')
+SConscript('tests/SConscript')

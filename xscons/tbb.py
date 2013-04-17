@@ -10,26 +10,40 @@ import re
 # Check for presence of TBB in a config context
 ###############################################################################
 
-def Check(context, version):       
-	context.Message('Checking for TBB version >= %s.0... ' % (version))
+def Check(context):       
+	version = context.env['tbb_minversion']
+	context.Message('Checking for TBB version >= %s... ' % (version))
+	v_arr = version.split(".")
+	version_maj = 0
+	version_min = 0
+	if len(v_arr) > 0:
+		version_maj = int(v_arr[0])
+	if len(v_arr) > 1:
+		version_min = int(v_arr[1])
 
 	ret = context.TryLink("""
 #include <tbb/tbb_stddef.h>
 
 #if TBB_VERSION_MAJOR < %d
-#error Installed TBB is too old!
+#error Installed TBB is too old (major version)!
+#else
+#if TBB_VERSION_MINOR < %d
+#error Installed TBB is too old (minor version)!
+#endif
 #endif
 int main() 
 {
     return 0;
 }
-""" % int (version), '.cpp')
+""" % (version_maj, version_min), '.cpp')
 	context.Result(ret)	
-
 	return ret
 
 def MakeOptions (opts):
 	arch   = platform.uname()[0]
+	opts.AddVariables(
+		('tbb_minversion', 'minimum TBB version', "3.0"),
+	)
 	if arch == 'Windows':
 		opts.AddVariables(
 			('tbbdir', 'Path to TBB library distribution.', 'C:\\tbb'),

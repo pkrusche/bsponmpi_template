@@ -1,5 +1,7 @@
+import os.path
 import platform
 import glob
+import re
 
 ###############################################################################
 # Setup Boost library 
@@ -9,7 +11,8 @@ import glob
 # Check for presence of boost in a config context
 ###############################################################################
 
-def Check(context, version):
+def Check(context):
+	version = context.env['boost_minversion']
     # Boost versions are in format major.minor.subminor
 	v_arr = version.split(".")
 	version_n = 0
@@ -41,8 +44,17 @@ def Check(context, version):
 ###############################################################################
 
 def MakeOptions(opts):
-	opts.AddVariables (
-	    ('boostdir', 'Path to Boost library in Win32', 'C:\\Boost\\include'),
+    arch   = platform.uname()[0]
+    if arch == 'Windows':    
+		opts.AddVariables (
+		    ('boostdir', 'Path to Boost library in Win32', 'C:\\Boost\\include') )
+    else:
+		opts.AddVariables (
+		    ('boostdir', 'Path to Boost library (empty by default)', '') )
+
+    opts.AddVariables (
+	    ('boost_minversion', 'Minimum acceptable version of Boost', '1.40'),
+	    ('boostlibs', 'Boost libraries to link with, separated by comma/whitespace/colon', 'boost_program_options')
 	)
 
 ###############################################################################
@@ -54,28 +66,32 @@ def MakeEnv ( env ):
     boost_lib = ''
     boostdir = env['boostdir']
 
-	# see if we can find boost
-    dirs = glob.glob(boostdir+"\\*")
-    if len(dirs) > 0:
-    	dirs.sort()
-    	boost_include = dirs[len(dirs) - 1]
-    	boost_lib = boostdir+"\\..\\lib"
+	# see if we can find boost on Windows
+    arch   = platform.uname()[0]
+    if arch == 'Windows':    
+	    dirs = glob.glob(boostdir+"\\*")
+	    if len(dirs) > 0:
+	    	dirs.sort()
+	    	boost_include = dirs[len(dirs) - 1]
+	    	boost_lib = boostdir+"\\..\\lib"
 
-    # boost include path must go into CCFLAGS because the scons include dependency
-    # parser may die otherwise
-
-	## this is what we do for 
-    if env['toolset'] == 'msvc' or env['toolset'] == 'intel_windows':
-		env.Append(
-			CPPFLAGS = '/I'+boost_include ,
-			LIBPATH = [ boost_lib ],
-		)
+	    # boost include path must go into CCFLAGS because the scons include dependency
+	    # parser may die otherwise
+	    if env['toolset'] == 'msvc' or env['toolset'] == 'intel_windows':
+			env.Append(
+				CPPFLAGS = '/I'+boost_include ,
+				LIBPATH = [ boost_lib ],
+			)
     else:
     	if boost_include:
 			env.Append(
 				CPPFLAGS = ' -I'+boost_include )
+			boost_lib = os.path.join(boost_include, '..', 'lib')
 
     	if boost_lib:
 			env.Append(
 				LIBPATH = [ boost_lib ] )
-    	env.Append(	LIBS = 'boost_program_options'  )
+
+    	blibs = []
+    	blibs.extend(re.split('[\s\n\r\:,]+', env['boostlibs']))
+    	env.Append(	LIBS = blibs  )

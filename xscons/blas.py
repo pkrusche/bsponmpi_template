@@ -1,17 +1,16 @@
-import platform
-import os.path
-import re
-
 ###############################################################################
-# Setup TBB library linking
+# Setup BLAS library linking
 ###############################################################################
 
 ###############################################################################
-# Check for presence of TBB in a config context
+# Check for presence of BLAS in a config context
 ###############################################################################
 
-def Check(context):       
+def Check(context): 
 	context.Message('Checking for CBLAS... ')
+	if context.env['cblas'] == 'none':
+		context.Result(0)	
+		return 0
 	ret = context.TryLink("""
 #include "../include/helpers/cblas.h"
 
@@ -22,10 +21,10 @@ int main(int argc, char ** argv) {
 	return 0;
 }
 """, '.c')
+	context.Result(ret)	
 	return ret
 
 def MakeOptions (opts):
-	arch   = platform.uname()[0]
 	opts.AddVariables(
 		('cblas', 'Which version of CBLAS to use. Allowed values: none|blas|atlas|openblas|accelerate (MacOS X only)', 'none'),
 	)
@@ -35,8 +34,6 @@ def MakeOptions (opts):
 ###############################################################################
 
 def MakeEnv (root):
-	platform_name = platform.uname()[0]
-	subarch = platform.uname()[4]
 	cblas = root['cblas']
 	
 	if cblas == 'blas':
@@ -47,4 +44,3 @@ def MakeEnv (root):
 		root.Append(LIBS=[ 'openblas' ])
 	elif cblas == 'accelerate':
 		root.Prepend(LINKFLAGS = '-framework Accelerate')
-

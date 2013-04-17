@@ -1,0 +1,8 @@
+#include <iostream>
+
+int main(int argc, char const *argv[])
+{
+	using namespace std;
+	cout << "Great success." << endl;
+	return 0;
+}
