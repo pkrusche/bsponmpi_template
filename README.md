@@ -183,7 +183,7 @@ In [site_scons/site_tools/mex.py](site_scons/site_tools/mex.py), there is now a 
 $ scons MATLAB_PATH=/Applications/MATLAB_R2012b.app/bin
 ```
 
-You can then build Mex files like shared libraries by adding this to a SConscript (see [src/SConscript](src/SConscript) and [src/mex_test.cpp](src/mex_test.cpp):
+You can then build Mex files like shared libraries by adding the following to a SConscript (see [src/SConscript](src/SConscript) and [src/mex_test.cpp](src/mex_test.cpp) ):
 
 ```python
 
