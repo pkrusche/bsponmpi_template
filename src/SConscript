@@ -2,3 +2,6 @@
 Import("root")
 
 root.Program('#bin/main', 'main.cpp')
+
+if root['MEX_EXT'] != '':
+	root.MEX('#bin/mex_test', 'mex_test.cpp')

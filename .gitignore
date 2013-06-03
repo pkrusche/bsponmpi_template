@@ -9,3 +9,4 @@ autoconfig.h
 bin/unit_tests
 .sconsign.dblite
 *.pyc
+mex_test.mexmaci64

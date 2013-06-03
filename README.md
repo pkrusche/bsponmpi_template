@@ -177,15 +177,22 @@ You can use the configuration variables `veclibdir` and `asmlibdir` to point to 
 
 ### [MATLAB](http://www.mathworks.co.uk/products/matlab/)
 
-In `site_scons/site_tools/mex.py`, there is now a simple builder for MEX files. If MATLAB is on your path, it should work out of the box, otherwise, you can set the MATLAB_PATH build variable to the bin directory of your installation e.g. like this:
+In [site_scons/site_tools/mex.py](site_scons/site_tools/mex.py), there is now a simple builder for MEX files. If MATLAB is on your path, it should work out of the box, otherwise, you can set the MATLAB_PATH build variable to the bin directory of your installation e.g. like this:
 
 ```bash
 $ scons MATLAB_PATH=/Applications/MATLAB_R2012b.app/bin
 ```
 
+You can then build Mex files like shared libraries by adding this to a SConscript (see [src/SConscript](src/SConscript) and [src/mex_test.cpp](src/mex_test.cpp):
+
+```python
+
+if root['MEX_EXT'] != '':
+    root.MEX('#bin/mex_test', 'mex_test.cpp')
+```
+
 _Remarks/TODOs:_
 
-* The mex builder doesn't handle dependencies automatically (i.e. it will build mex files first unless you use `Depends` from SCons to fix this manually).
 * Using boost in MEX files can make trouble. MATLAB ships with a dynamic library version of Boost which may be incompatible with the one you're using (e.g. it appears that the one that comes with R2012b doesn't know about the Bzip2 part in boost::iostreams). To fix such runtime link errors, I found the easiest way is to link boost statically (build boost using `b2 link=static`). Other possible (and more tricky) solutions are:
 
     *  This one (which I wasn't able to reproduce on MacOS X, but it probably works on Linux): [http://stackoverflow.com/questions/13934107/using-boost-in-matlab-mex-library-different-from-matlabs-version](http://stackoverflow.com/questions/13934107/using-boost-in-matlab-mex-library-different-from-matlabs-version)

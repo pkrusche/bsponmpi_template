@@ -5,10 +5,10 @@
 
 
 import os
-import SCons
 import sys, traceback
 
-from SCons.Builder import Builder
+from SCons import *
+from SCons.Defaults import *
 from subprocess import Popen,PIPE
 
 def findMatlab(env, tool='mex'):
@@ -29,7 +29,20 @@ def getMexPath(env):
     return mex
 
 def generate(env):
-    bld = Builder(action = '$MEX $SOURCE -o $TARGET $MATLAB_MEX_EXTRA $_CCCOMCOM $_LIBDIRFLAGS $_LIBFLAGS $LINKFLAGS ')
+    bld = SCons.Builder.Builder(action = '$MEX $SOURCE -o $TARGET $MATLAB_MEX_EXTRA $_CCCOMCOM $_LIBDIRFLAGS $_LIBFLAGS $LINKFLAGS', 
+                                emitter = "$SHLIBEMITTER",
+                                suffix = '.$MEX_EXT',
+                                target_scanner = SCons.Scanner.Prog.ProgramScanner(), 
+                                src_scanner = SCons.Scanner.C.CScanner(),
+                               )
+
+    # bld = Builder(action = '$MEX $SOURCE -o $TARGET $MATLAB_MEX_EXTRA $_CCCOMCOM $_LIBDIRFLAGS $_LIBFLAGS $LINKFLAGS ')
+    
+    # MexSuffixes = ['.c', '.cpp']
+    # mexscanner = SCons.Scanner.C.CScanner()
+    # for suffix in MexSuffixes:
+    #     SCons.Tool.SourceFileScanner.add_scanner(suffix, mexscanner)
+
     env['BUILDERS']['MEX'] = bld
     env['MEX'] = findMatlab(env, 'mex')
 
@@ -54,7 +67,7 @@ def generate(env):
             print '-'*60
         else:
             print "MEX wasn't found [set MATLAB_PATH to enable]."
-        env['MEX_EXT']  = 'mex'
+        env['MEX_EXT']  = ''
 
 
 def exists(env):
