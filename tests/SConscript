@@ -1,14 +1,14 @@
 import re
 import glob
 
-Import("root", "runtests")
+Import("root")
 
 def do_test(target, source):
 	p = root.Program (target, source)
 	t = root.Test (target + ".passed", p)
 	AlwaysBuild(t)
 
-if runtests:
+if root["runtests"]:
 	for s in glob.glob('test_*.cpp'):
 		m = re.match (r"test_(?P<name>.+)\.cpp", s)
 		n = m.group ('name')

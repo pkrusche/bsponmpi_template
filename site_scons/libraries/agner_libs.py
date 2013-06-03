@@ -9,7 +9,7 @@ import os.path
 # Check for presence of libraries in a config context
 ###############################################################################
 
-def Check(context):       
+def check(context):       
 	context.Message('Checking for Agner Fog\'s libraries ')
 
 	ret = 0
@@ -77,7 +77,7 @@ int main()
 	context.Result(ret)	
 	return ret
 
-def MakeOptions (opts):
+def make_options (opts):
 	arch   = platform.uname()[0]
 	if arch == 'Windows':
 		opts.AddVariables(
@@ -94,7 +94,7 @@ def MakeOptions (opts):
 # Add libraries to an enviroment
 ###############################################################################
 
-def MakeEnv (root):
+def generate (root):
 	arch   = str(platform.uname()[0]).lower()
 	subarch = platform.uname()[4]
 	bitness = platform.architecture()[0]
