@@ -21,6 +21,7 @@ Additionally, you can check for these:
 
 * A version of BLAS [e.g. OpenBLAS](https://github.com/xianyi/OpenBLAS) 
 * [Agner Fog's Vectorclass library](http://agner.org/optimize/)
+* [MATLAB](http://www.mathworks.co.uk/products/matlab/) : MATLAB, The MathWorks, Inc., Natick, Massachusetts, United States. (for building MEX files/writing MAT files).
 
 You can then compile the project by running
 
@@ -173,3 +174,19 @@ Using the right version of BLAS will dramatically improve performance (rule of t
 This is a useful library for implementing vector operations using MMX/SSE/AVX (also, there is a library with a faster version of `memcpy`).
 
 You can use the configuration variables `veclibdir` and `asmlibdir` to point to the locations of these libraries (default locations are in `../(asm|vec)libdir`).
+
+### [MATLAB](http://www.mathworks.co.uk/products/matlab/)
+
+In `site_scons/site_tools/mex.py`, there is now a simple builder for MEX files. If MATLAB is on your path, it should work out of the box, otherwise, you can set the MATLAB_PATH build variable to the bin directory of your installation e.g. like this:
+
+```bash
+$ scons MATLAB_PATH=/Applications/MATLAB_R2012b.app/bin
+```
+
+_Remarks/TODOs:_
+
+* The mex builder doesn't handle dependencies automatically (i.e. it will build mex files first unless you use `Depends` from SCons to fix this manually).
+* Using boost in MEX files can make trouble. MATLAB ships with a dynamic library version of Boost which may be incompatible with the one you're using (e.g. it appears that the one that comes with R2012b doesn't know about the Bzip2 part in boost::iostreams). To fix such runtime link errors, I found the easiest way is to link boost statically (build boost using `b2 link=static`). Other possible (and more tricky) solutions are:
+
+    *  This one (which I wasn't able to reproduce on MacOS X, but it probably works on Linux): [http://stackoverflow.com/questions/13934107/using-boost-in-matlab-mex-library-different-from-matlabs-version](http://stackoverflow.com/questions/13934107/using-boost-in-matlab-mex-library-different-from-matlabs-version)
+    *  Fix rpath manually in the shared object/Mex file after building.
