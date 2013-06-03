@@ -1,4 +1,6 @@
 # mex.py:  Matlab extension builder
+
+# Based on http://scons.org/wiki/MexBuilder by
 # Joe VanAndel, vanandel@ucar.edu, 2010/1/15
 
 
