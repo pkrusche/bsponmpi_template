@@ -45,10 +45,13 @@ def generate(env):
         print "Matlab found, using mex extension: %s" % env['MEX_EXT']
 
     except Exception, e:
-        print "Could not automatically determine mex extension. " + str(e)
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if env.get('MATLAB_PATH'):
+            print "Could not automatically determine mex extension. " + str(e)
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+        else:
+            print "MEX wasn't found [set MATLAB_PATH to enable]."
         env['MEX_EXT']  = 'mex'
 
 
