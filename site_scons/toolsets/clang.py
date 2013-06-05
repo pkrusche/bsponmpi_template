@@ -14,7 +14,8 @@ def generate (root):
 	root['CC'] = 'clang'
 	root['CXX'] = 'clang++'
 	root['LINK'] = 'clang++'
-	root['ENV']['TERM'] = os.environ['TERM']
+	if os.environ.has_key('TERM'):
+		root['ENV']['TERM'] = os.environ['TERM']
 	
 	mode      = root['mode']
 	debuginfo = root['debuginfo']
@@ -41,5 +42,3 @@ def generate (root):
 			CCFLAGS=fast,
 			)
 	root.Replace(LINK = 'g++')
-
-Export( [ 'PrepareEnv'] )
